@@ -1,4 +1,4 @@
-﻿angular.module('canvasGrid', ['angularMoment']).factory("Canvas", function (moment) {
+﻿angular.module('canvasGrid', ['angularMoment']).factory("Canvas", function (moment,$rootScope) {
     var main = this;
     main.$table = $(".table-responsive");
     var nodeData = function (time, value) {
@@ -59,6 +59,18 @@
         this.y = y - h / 2;
         this.value = value;
     }
+
+    //竖直分割线模型
+    var splitNode = function (x, y) {
+        var self = this;
+        this.X = x;
+        this.Y = y;
+        self.selectClick = function (e) {
+            console.log("is Select"+e.pageX);
+           // self.X -= 100;
+        }
+
+    }
     main.width = 1000;
     main.height = 400;
     main.startDate = null;
@@ -75,6 +87,7 @@
     main.offsetTime = 3600;  //起始结束相隔时间 秒
     main.offsetValue = 80;  //Y坐标值
     main.canvasContext = null;
+    main.splitLines = [];
     main.init = function () {
         main.startDate = moment("2016-10-19 08:00:00");
         main.endDate = moment("2016-10-19 08:00:00").add(1, 'hours');
@@ -86,6 +99,7 @@
         console.log(main.endDate);
         console.log("hegiht" + main.height);
         main.loadAxis();
+       
 
     }
     main.loadAxis = function () {
@@ -136,6 +150,23 @@
             });
 
         }
+    }
+    main.currMousePageX = 0;
+    main.currMousePageY = 0;
+    main.currSelectSplit = null;
+    main.mouserOverEvent = function (e) {
+        main.currMousePageX = e.clientX;
+        main.currMousePageY = e.clientY;
+        if (main.currSelectSplit != null) {
+            main.currSelectSplit.X = e.clientX;
+            $rootScope.$apply();
+            console.log("selectSplit is Move"+e.clientX);
+        }
+       
+    }
+    //鼠标双击 竖直分割线
+    main.mouseDbClick = function () {
+        main.splitLines.push(new splitNode(main.currMousePageX, main.currMousePageY));
     }
 
 

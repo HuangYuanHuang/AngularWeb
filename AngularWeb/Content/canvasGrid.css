@@ -2,6 +2,11 @@
    
     height:60px;
 }
-/*table {
-background-color:green;
-}*/
+
+/*去除bootstap hr样式*/
+hr {
+   
+    cursor:w-resize;
+    border-top:2px dotted #185598;
+    
+}

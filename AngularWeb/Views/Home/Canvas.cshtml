@@ -110,7 +110,11 @@
 
             </div>
 
-            <canvas id="canvas" height="{{Model.height}}" width="{{Model.width}}" style="z-index:111;position:absolute;left:{{Model.offsetLeft+9}}px;top:{{Model.offsetTop}}px"></canvas>
+            <canvas id="canvas" ng-mousemove="Model.mouserOverEvent($event)"  ng-dblclick="Model.mouseDbClick()" height="{{Model.height}}" width="{{Model.width}}" style="z-index:10;position:absolute;top:{{Model.offsetTop}}px"></canvas>
+
+            <div class="mousehr">
+                <hr  ng-repeat="item in Model.splitLines" ng-mousedown="item.selectClick($event)" style="width:1px;height:{{Model.height-10}}px;z-index:12;position:absolute;top:{{Model.offsetTop}}px;left:{{item.X}}px" />
+            </div>
         </div>
        
     </div>
@@ -126,7 +130,10 @@
             $timeout(function () {
                 Canvas.initLineData();
                 Canvas.draw();
-            },500)
+               
+            }, 500)
+
+            
         });
 
 
