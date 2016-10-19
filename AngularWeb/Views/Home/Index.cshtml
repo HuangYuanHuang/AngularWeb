@@ -1,0 +1,143 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+<div class="jumbotron">
+    <h1>ASP.NET</h1>
+    <p class="lead">ASP.NET is a free web framework for building great Web sites and Web applications using HTML, CSS and JavaScript.</p>
+    <p><a href="http://asp.net" class="btn btn-primary btn-lg">Learn more &raquo;</a></p>
+</div>
+
+<div class="row">
+
+
+
+    <div class="panel panel-default">
+        <div class="panel-heading">默认ng-pp</div>
+        <div class="panel-body">
+            <div id="app" ng-app="">
+                <p>名字 : <input type="text" ng-model="name" class="form-control"></p>
+                <h1>Hello {{name}}</h1>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="panel panel-default">
+        <div class="panel-heading">表达式</div>
+        <div class="panel-body">
+            <div id="mainApp" ng-app="mainApp" ng-controller="mainController">
+                <input type="text" class="form-control" ng-model="firstName" />
+                <input type="text" class="form-control" ng-model="lastName" />
+                <h1>Hello {{(firstName+" "+lastName)|uppercase}}</h1>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="panel panel-default">
+        <div class="panel-heading">HTTP服务 AND Filter AND 默认选中select</div>
+        <div class="panel-body">
+            <div id="httpApp" ng-app="httpApp" ng-controller="httpController">
+                <input class="form-control" ng-model="serch" type="text" />
+                <ul>
+                    <li class="list-group-item" ng-repeat="item in list|filter:serch">
+                        {{"姓名："+ item.name+"年龄："+item.age}}
+                    </li>
+                </ul>
+                <select class="form-control" ng-model="selectedName" ng-options="item.name for item in list"></select>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="panel panel-default">
+        <div class="panel-heading">Tree 绑定</div>
+        <div class="panel-body">
+            <div id="treeApp" ng-app="treeApp" ng-controller="treeController">
+
+                <script id="recursion" type="text/ng-template">
+
+                    <li ng-repeat="item in cate">
+                        <a href="{{item.cateId}}">{{item.cateName}}</a>
+                        <ul ng-if="item.child.length" ng-include="'recursion'" ng-init="cate=item.child"></ul>
+
+                    </li>
+
+                </script>
+                <ul ng-include="'recursion'"></ul>
+                @*<ul recursion="cate">
+                   
+                    <li ng-repeat="item in cate">
+                                <a href="{{item.cateId}}">{{item.cateName}}</a>
+                                <ul recursion-child='item.child'></ul>
+                        
+                    </li>
+                    
+                </ul>*@
+
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@section scripts{
+    <script type="text/javascript">
+
+        var cate = [
+    {
+        cateId: 1,
+        cateName: '前端技术',
+        child: [
+            {
+                cateId: 4,
+                cateName: 'JavaScript'
+            },
+
+        ]
+    },
+           {
+               cate: 2,
+               cateName: '后端技术',
+               child: [
+                   {
+                       cateId: 3,
+                       cateName: 'PHP',
+                       child: [
+                          {
+                              cateId: 6,
+                              cateName: 'ThinkPHP'
+                          },
+
+                       ]
+                   }
+               ]
+           }
+        ];
+
+        var app = angular.module("mainApp", []);
+        app.controller("mainController", function ($scope) {
+            $scope.firstName = "hello";
+            $scope.lastName = "world";
+        });
+
+        var httpApp = angular.module("httpApp", []);
+        httpApp.controller("httpController", function ($scope, $http) {
+            $scope.serch = "2";
+            $http.post('@Url.Action("List")', { responseType: 'json' }).success(function (data) {
+                $scope.list = data;
+                $scope.selectedName = data[1];//
+            });
+        });
+        angular.module("treeApp", []).controller("treeController", function ($scope) {
+            $scope.cate = cate;
+        });
+        angular.bootstrap(document.getElementById("treeApp"), ['treeApp']);
+        angular.bootstrap(document.getElementById("mainApp"), ['mainApp']);
+        angular.bootstrap(document.getElementById("httpApp"), ['httpApp']);
+
+    </script>
+}

@@ -1,0 +1,137 @@
+﻿
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html ng-app="app">
+<head>
+    <meta charset="UTF-8">
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <script src="~/Scripts/jquery-1.10.2.js"></script>
+    <script src="~/Scripts/bootstrap.js"></script>
+    <script src="~/Scripts/angular.js"></script>
+    <script src="~/Scripts/moment.min.js"></script>
+    <script src="~/Scripts/moment-with-locales.js"></script>
+    <script src="~/Scripts/angular-moment.min.js"></script>
+    <link href="~/Content/canvasGrid.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="container" ng-controller="canvasController" >
+        <div class="table-responsive" style="margin-top:20px">
+            <table class="table table-bordered">
+
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </table>
+            <div class="xtitle">
+                <label  ng-repeat="item in Model.axisXPosition" style="position:absolute;left:{{item.x}}px;top:{{item.y}}px">{{item.value|amDateFormat:'YYYY-MM-DD HH:mm:ss'}}</label>
+                
+            </div>
+            <div class="ytitle">
+                <label ng-repeat="item in Model.axisYPosition" style="position:absolute;left:{{item.x}}px;top:{{item.y}}px">{{item.value}}</label>
+
+            </div>
+
+            <canvas id="canvas" height="{{Model.height}}" width="{{Model.width}}" style="z-index:111;position:absolute;left:{{Model.offsetLeft+9}}px;top:{{Model.offsetTop}}px"></canvas>
+        </div>
+       
+    </div>
+    <script src="~/app/GridCanvas.js"></script>
+    <script type="text/javascript">
+
+        angular.module('app', ["canvasGrid"]).controller("canvasController", function ($scope, Canvas,$timeout) {
+            $scope.Model = Canvas;
+
+            Canvas.init();
+          
+        
+            $timeout(function () {
+                Canvas.initLineData();
+                Canvas.draw();
+            },500)
+        });
+
+
+    </script>
+
+    
+</body>
+</html>

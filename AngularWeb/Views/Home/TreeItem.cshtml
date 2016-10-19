@@ -1,0 +1,14 @@
+﻿
+@{
+    Layout = null;
+}
+
+<i ng-click="itemExpended(item, $event);" class=""></i>
+
+<input type="checkbox" ng-model="item.$$isChecked" class="check-box" ng-if="canChecked" ng-change="warpCallback('itemCheckedChanged', item, $event)">
+
+<span class='text-field' ng-click="warpCallback('itemClicked', item, $event);"></span>
+<ul ng-if="!isLeaf(item)" ng-show="item.$$isExpend">
+    <li ng-repeat="item in item.children" ng-include="'@Url.Action("TreeItem")'">
+    </li>
+</ul>
