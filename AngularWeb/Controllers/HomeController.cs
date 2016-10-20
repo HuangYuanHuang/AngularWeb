@@ -40,10 +40,7 @@ namespace AngularWeb.Controllers
             } });
         }
 
-        public ActionResult Canvas()
-        {
-            return View();
-        }
+      
         public ActionResult TreeItem()
         {
             return View();

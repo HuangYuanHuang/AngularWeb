@@ -134,18 +134,17 @@
     <script src="~/app/GridCanvas.js"></script>
     <script type="text/javascript">
         var app = angular.module('app', ["canvasGrid"]);
-        app.controller("canvasController", function ($scope, Canvas, $timeout) {
+        app.controller("canvasController", function ($scope, Canvas, $timeout,$http) {
             $scope.Model = Canvas;
 
             Canvas.init();
 
-
-            $timeout(function () {
-                Canvas.initLineData();
+            $http.post('@Url.Action("List")').success(function (data) {
+                Canvas.initLineData(data);
                 Canvas.draw();
+            })
 
-            }, 500)
-
+          
 
         });
 

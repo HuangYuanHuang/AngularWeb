@@ -7,6 +7,11 @@
 hr {
    
     cursor:w-resize;
-    border-top:2px dotted #185598;
+    border-color:red;
+    border-style: solid;
+    border-width:1px;
+    margin-bottom:0px;border-top:2px;
+    margin-top:0px;
     
 }
+  

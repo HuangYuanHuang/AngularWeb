@@ -1,23 +1,27 @@
-﻿angular.module('canvasGrid', ['angularMoment']).factory("Canvas", function (moment,$rootScope) {
+﻿angular.module('canvasGrid', ['angularMoment']).factory("Canvas", function (moment, $rootScope,$http) {
     var main = this;
     main.$table = $(".table-responsive");
-    var nodeData = function (time, value) {
+    var nodeData = function (time, value, min, max) {
         var self = this;
         self.time = time;
         self.value = value;
         self.path = function () {
+            console.log((moment(time).diff(main.startDate, 'seconds', true)));
             var X = (moment(time).diff(main.startDate, 'seconds', true) * 1.0 / main.offsetTime) * main.width;
-            var Y = main.height - ((self.value - main.minValue) * 1.0 / main.offsetValue) * main.height;
-          
+            var Y = main.height - ((self.value - min) * 1.0 / (max - min)) * main.height;
+
             return { X: X, Y: Y };
         };
 
     }
-    var lineNode = function (name, color, data, style) {
+    var lineNode = function (name, color, data, style, min, max) {
         var self = this;
         self.name = name;
         self.color = color;
         self.data = data || [];
+        self.minValue = min;
+        self.maxValue = max;
+        self.axisYPosition = [];
         self.style = style;
         self.addData = function (item) {
             self.data.push(item);
@@ -26,7 +30,7 @@
 
 
             for (var i = 0; i < array.length; i++) {
-                self.data.push(new nodeData(array[i].t, array[i].v));
+                self.data.push(new nodeData(array[i].Time, array[i].Value, self.minValue, self.maxValue));
 
             }
         }
@@ -40,15 +44,14 @@
                 main.canvasContext.strokeStyle = self.color;
                 main.canvasContext.lineWidth = 2;
                 main.canvasContext.moveTo(self.data[0].path().X, self.data[0].path().Y);
-                for (var i = 1; i < self.data.length - 1; i++) {
+                for (var i = 1; i < self.data.length; i++) {
                     main.canvasContext.lineTo(self.data[i].path().X, self.data[i].path().Y);
 
                 }
-                var len = self.data.length - 1;
-                main.canvasContext.lineTo(self.data[len].path().X, self.data[len].path().Y);
+
             }
 
-           
+
             main.canvasContext.stroke();
             main.canvasContext.closePath();
 
@@ -61,13 +64,47 @@
     }
 
     //竖直分割线模型
-    var splitNode = function (x, y) {
+    var splitNode = function (id, x, y) {
         var self = this;
+        self.id = id;
         this.X = x;
         this.Y = y;
+        self.contextMenu = false;
         self.selectClick = function (e) {
-            console.log("is Select"+e.pageX);
-           // self.X -= 100;
+
+            main.currSelectSplit = self;
+        }
+        self.mouseRightClick = function (e) {
+            console.log("right Click" + e.clientX);
+            main.splitLines.forEach(function (item) {
+
+                item.contextMenu = false;
+            });
+            self.contextMenu = true;
+            self.Y = e.clientY;
+        }
+        self.remove = function () {
+            var index = -1;
+            for (var i = 0; i < main.splitLines.length ; i++) {
+                if (main.splitLines[i].id == self.id) {
+                    index = i;
+                    break;
+                }
+            }
+            if (index >= 0) {
+                main.splitLines.splice(index, 1);
+            }
+
+        };
+        self.clear = function () {
+            while (main.splitLines.length > 0) {
+                main.splitLines.pop();
+
+            }
+        }
+        self.selectMouseUp = function (e) {
+
+            main.currSelectSplit = null;
         }
 
     }
@@ -88,6 +125,7 @@
     main.offsetValue = 80;  //Y坐标值
     main.canvasContext = null;
     main.splitLines = [];
+    main.splitIndex = 0;
     main.init = function () {
         main.startDate = moment("2016-10-19 08:00:00");
         main.endDate = moment("2016-10-19 08:00:00").add(1, 'hours');
@@ -99,7 +137,7 @@
         console.log(main.endDate);
         console.log("hegiht" + main.height);
         main.loadAxis();
-       
+
 
     }
     main.loadAxis = function () {
@@ -119,22 +157,16 @@
         }
         console.log(main.endDate.format());
     }
-    main.initLineData = function () {
-        var line = new lineNode("Lin1", "#0000ff", [], "");
-        var array = [{ t: '2016-10-19 08:00:00', v: 30 }, { t: '2016-10-19 08:10:00', v: 50 }, { t: '2016-10-19 08:15:00', v: 5 }, { t: '2016-10-19 08:16:00', v: 65 }
-        , { t: '2016-10-19 08:20:00', v: 5 }, { t: '2016-10-19 08:27:00', v: 13 }, { t: '2016-10-19 08:33:00', v: 52 }
-        , { t: '2016-10-19 08:40:00', v: 31 }, { t: '2016-10-19 08:43:00', v: 68 }, { t: '2016-10-19 08:55:00', v: 42 }];
+    main.initLineData = function (array) {
 
-        line.init(array);
-        main.nodes.push(line);
+        for (var c in array) {
 
-        line = new lineNode("Lin1", "red", [], "");
-        var array = [{ t: '2016-10-19 08:06:00', v: 10 }, { t: '2016-10-19 08:10:00', v: 70 }, { t: '2016-10-19 08:13:00', v: 12 }, { t: '2016-10-19 08:16:00', v: 65 }
-        , { t: '2016-10-19 08:23:00', v: -20 }, { t: '2016-10-19 08:27:00', v: 23 }, { t: '2016-10-19 08:39:00', v: 2 }
-        , { t: '2016-10-19 08:43:00', v: 54 }, { t: '2016-10-19 08:50:00', v: 40 }, { t: '2016-10-19 09:00:00', v: 80 }];
+            var node = new lineNode(array[c].TagName, array[c].Color, [], "", array[c].MinValue, array[c].MaxValue);
+            node.init(array[c].Data);
+            main.nodes.push(node);
+        }
 
-        line.init(array);
-        main.nodes.push(line);
+
     }
     main.draw = function () {
         var canvas = document.getElementById("canvas");
@@ -159,14 +191,14 @@
         main.currMousePageY = e.clientY;
         if (main.currSelectSplit != null) {
             main.currSelectSplit.X = e.clientX;
-            $rootScope.$apply();
-            console.log("selectSplit is Move"+e.clientX);
+
         }
-       
+
     }
     //鼠标双击 竖直分割线
     main.mouseDbClick = function () {
-        main.splitLines.push(new splitNode(main.currMousePageX, main.currMousePageY));
+        main.splitLines.push(new splitNode(main.splitIndex, main.currMousePageX, main.currMousePageY));
+        main.splitIndex++;
     }
 
 
