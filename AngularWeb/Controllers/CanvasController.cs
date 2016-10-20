@@ -19,13 +19,13 @@ namespace AngularWeb.Controllers
         {
             var lineModel = new LineModel() { Color = "red", TagName = "位号1" };
             Random rand = new Random();
-            for (int i = 10; i < 59; i++)
+            for (int i = 0; i < 59; i++)
             {
                
                 lineModel.Data.Add(new LineDataNode()
                 {
                     Value = i*rand.Next(-10, 20),
-                    Time = $"2016-10-19 08:{rand.Next(10,60)}:00"
+                    Time = $"2016-10-19 08:{rand.Next(0,60).ToString("D2")}:00"
                 });
             }
            

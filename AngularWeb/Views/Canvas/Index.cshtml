@@ -21,7 +21,7 @@
         <div class="table-responsive" style="margin-top:20px">
             <table class="table table-bordered">
 
-                <tr>
+                <tr ng-repeat="item in Model.tableRow" on-finish-render-filters style="height:{{Model.tableRowHeight}}px">
                     <td></td>
                     <td></td>
                     <td></td>
@@ -31,76 +31,7 @@
                     <td></td>
                     <td></td>
                 </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
+
             </table>
             <div class="xtitle">
                 <label ng-repeat="item in Model.axisXPosition" style="position:absolute;left:{{item.x}}px;top:{{item.y}}px">{{item.value|amDateFormat:'YYYY-MM-DD HH:mm:ss'}}</label>
@@ -134,18 +65,18 @@
     <script src="~/app/GridCanvas.js"></script>
     <script type="text/javascript">
         var app = angular.module('app', ["canvasGrid"]);
-        app.controller("canvasController", function ($scope, Canvas, $timeout,$http) {
+        app.controller("canvasController", function ($scope, Canvas, $timeout, $http) {
             $scope.Model = Canvas;
 
-            Canvas.init();
+            $scope.$on('ngRepeatFinished', function (ngRepeatFinishedEvent) {
+                Canvas.init();
+                $http.post('@Url.Action("List")').success(function (data) {
 
-            $http.post('@Url.Action("List")').success(function (data) {
-                Canvas.initLineData(data);
-                Canvas.draw();
-            })
+                    Canvas.initLineData(data);
+                    Canvas.draw();
 
-          
-
+                })
+            });
         });
 
         app.directive('ngRightClick', function ($parse) {
@@ -157,6 +88,18 @@
                         fn(scope, { $event: event });
                     });
                 });
+            };
+        });
+        app.directive('onFinishRenderFilters', function ($timeout) {
+            return {
+                restrict: 'A',
+                link: function (scope, element, attr) {
+                    if (scope.$last === true) {
+                        $timeout(function () {
+                            scope.$emit('ngRepeatFinished');
+                        });
+                    }
+                }
             };
         });
 

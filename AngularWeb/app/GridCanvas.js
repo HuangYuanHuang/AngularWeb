@@ -1,4 +1,4 @@
-﻿angular.module('canvasGrid', ['angularMoment']).factory("Canvas", function (moment, $rootScope,$http) {
+﻿angular.module('canvasGrid', ['angularMoment']).factory("Canvas", function (moment, $rootScope, $http) {
     var main = this;
     main.$table = $(".table-responsive");
     var nodeData = function (time, value, min, max) {
@@ -6,7 +6,7 @@
         self.time = time;
         self.value = value;
         self.path = function () {
-            console.log((moment(time).diff(main.startDate, 'seconds', true)));
+           
             var X = (moment(time).diff(main.startDate, 'seconds', true) * 1.0 / main.offsetTime) * main.width;
             var Y = main.height - ((self.value - min) * 1.0 / (max - min)) * main.height;
 
@@ -57,10 +57,11 @@
 
         }
     }
-    var position = function (x, y, value, width, h) {
+    var position = function (x, y, value, width, h, color) {
         this.x = x - width / 2;
         this.y = y - h / 2;
         this.value = value;
+        this.color = color;
     }
 
     //竖直分割线模型
@@ -112,14 +113,15 @@
     main.height = 400;
     main.startDate = null;
     main.endDate = null;
-    main.minValue = 0;
-    main.maxValue = 80;
-    main.nodes = [];
+
+    main.nodes = [];  //line 集合
 
     main.offsetTop = 0;
     main.offsetLeft = 0;
     main.axisXPosition = [];
     main.axisYPosition = [];
+    main.tableRow = [1,2,3,4,5,6,7,8];  //Table Row
+    main.tableRowHeight =80; //Table　row height
 
     main.offsetTime = 3600;  //起始结束相隔时间 秒
     main.offsetValue = 80;  //Y坐标值
@@ -133,10 +135,10 @@
         main.height = main.$table.height();
         main.offsetTop = main.$table.offset().top;
         main.offsetLeft = main.$table.offset().left;
-        console.log(main.startDate);
-        console.log(main.endDate);
-        console.log("hegiht" + main.height);
+      
+        console.log("hegiht=" + main.height + " width=" + main.width);
         main.loadAxis();
+       
 
 
     }
@@ -155,7 +157,7 @@
             var node = new position(main.offsetLeft - 20, main.offsetTop + (i * itemY) - i, main.maxValue - i * 10, 0, 12);
             main.axisYPosition.push(node);
         }
-        console.log(main.endDate.format());
+
     }
     main.initLineData = function (array) {
 
@@ -166,6 +168,23 @@
             main.nodes.push(node);
         }
 
+        //var getArr = function (len) {
+
+        //    for (var i = 0; i < len; i++) {
+        //        main.tableRow.push(i);
+        //    }
+
+        //}
+        //if (main.nodes.length <= 3) {
+        //    getArr(8);
+        //    main.tableRowHeight = 60;
+        //} else if (main.nodes.length < 8) {
+        //    getArr(5);
+        //    main.tableRowHeight = 80;
+        //} else {
+        //    getArr(3);
+        //    main.tableRowHeight = 130;
+        //}
 
     }
     main.draw = function () {
