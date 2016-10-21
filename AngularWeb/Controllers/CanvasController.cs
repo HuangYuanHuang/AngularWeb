@@ -15,22 +15,39 @@ namespace AngularWeb.Controllers
         }
 
         [HttpPost]
+        //[OutputCache(Duration = 6000)]
         public JsonResult List()
         {
-            var lineModel = new LineModel() { Color = "red", TagName = "位号1" };
+
+
+            return Json(GetData());
+        }
+
+        private List<LineModel> GetData()
+        {
+            List<LineModel> list = new List<LineModel>();
+            string[] arr = { "red", "#66ff99", "#0033cc", "#000066", "#00ff00" };
             Random rand = new Random();
-            for (int i = 0; i < 59; i++)
+            for (int d = 0; d < 5; d++)
             {
+                var lineModel = new LineModel() { Color = arr[d], TagName = "位号" + d };
                
-                lineModel.Data.Add(new LineDataNode()
+                for (int i = 0; i < 59; i++)
                 {
-                    Value = i*rand.Next(-10, 20),
-                    Time = $"2016-10-19 08:{rand.Next(0,60).ToString("D2")}:00"
-                });
+
+                    lineModel.Data.Add(new LineDataNode()
+                    {
+                        Value = i * rand.Next(-10, 20),
+                        Time = $"2016-10-19 08:{rand.Next(0, 60).ToString("D2")}:00"
+                    });
+                }
+
+                lineModel.SetMinMaxValue();
+                list.Add(lineModel);
             }
-           
-            lineModel.SetMinMaxValue();
-            return Json(new[] { lineModel });
+
+
+            return list;
         }
     }
 }

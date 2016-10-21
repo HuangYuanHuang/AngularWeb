@@ -1,12 +1,12 @@
 ﻿angular.module('canvasGrid', ['angularMoment']).factory("Canvas", function (moment, $rootScope, $http) {
     var main = this;
-    main.$table = $(".table-responsive");
+    main.$table = $("#tableCanvas");
     var nodeData = function (time, value, min, max) {
         var self = this;
         self.time = time;
         self.value = value;
         self.path = function () {
-           
+
             var X = (moment(time).diff(main.startDate, 'seconds', true) * 1.0 / main.offsetTime) * main.width;
             var Y = main.height - ((self.value - min) * 1.0 / (max - min)) * main.height;
 
@@ -23,16 +23,32 @@
         self.maxValue = max;
         self.axisYPosition = [];
         self.style = style;
+
         self.addData = function (item) {
             self.data.push(item);
         }
         self.init = function (array) {
-
-
             for (var i = 0; i < array.length; i++) {
                 self.data.push(new nodeData(array[i].Time, array[i].Value, self.minValue, self.maxValue));
 
             }
+            self.initYAxis();
+        }
+        self.initYAxis = function () {
+            var index = main.nodes.length;
+            var rows = main.tableRow.length;
+            var itemY = (self.maxValue - self.minValue) / rows;
+            var itemHeight = main.height / rows;
+            var itemIndex = 0;
+            var tempX = $("tr", main.$table).offset().left - 80;
+            for (var i = rows - 1; i >= 0; i--) {
+                var tempY = $("tr:eq(" + i + ")", main.$table).offset().top + itemHeight - index * main.labelHeight;
+                console.log("Y=" + tempY);
+                self.axisYPosition.push(new position(tempX, tempY, itemIndex * itemY + self.minValue, self.color));
+                itemIndex++;
+            }
+            //var lastY = self.axisYPosition[rows-1].y - self.axisYPosition[0].y + self.axisYPosition[1].y;
+            //self.axisYPosition.push(new position(tempX,lastY,self.maxValue,self.color));
         }
         self.clearData = function () {
 
@@ -57,9 +73,9 @@
 
         }
     }
-    var position = function (x, y, value, width, h, color) {
-        this.x = x - width / 2;
-        this.y = y - h / 2;
+    var position = function (x, y, value, color) {
+        this.x = x;
+        this.y = y;
         this.value = value;
         this.color = color;
     }
@@ -116,15 +132,18 @@
 
     main.nodes = [];  //line 集合
 
+
     main.offsetTop = 0;
     main.offsetLeft = 0;
     main.axisXPosition = [];
     main.axisYPosition = [];
-    main.tableRow = [1,2,3,4,5,6,7,8];  //Table Row
-    main.tableRowHeight =80; //Table　row height
+    main.tableRow = [1, 2, 3, 4, 5, 6, 7, 8];  //Table Row
+    main.tableRowHeight = 60; //Table　row height
 
     main.offsetTime = 3600;  //起始结束相隔时间 秒
     main.offsetValue = 80;  //Y坐标值
+    main.labelWidth = 72; //标签实际长度的1/2
+    main.labelHeight = 10; //标签实际高度的1/2
     main.canvasContext = null;
     main.splitLines = [];
     main.splitIndex = 0;
@@ -135,37 +154,43 @@
         main.height = main.$table.height();
         main.offsetTop = main.$table.offset().top;
         main.offsetLeft = main.$table.offset().left;
-      
+
         console.log("hegiht=" + main.height + " width=" + main.width);
         main.loadAxis();
-       
+
 
 
     }
     main.loadAxis = function () {
-        var itemX = main.width * 1.0 / 4;
+
         var date = main.endDate.diff(main.startDate, 'seconds', true) / 4;
         var temp = main.startDate.format();
+        var offsetTop = $("tr:last", main.$table).offset().top + $("tr:last", main.$table).height() + 20;
         console.log(date + "时间间隔");
-        for (var i = 0; i < 5; i++) {
-            var node = new position(main.offsetLeft + i * itemX, main.offsetTop + 10 + main.height, moment(temp).add(i * date, 'seconds'), 120, 0);
+        var index = 0;
+        for (var i = 0; i < 8; i += 2) {
+            var left = $("tr:last td:eq(" + i + ")", main.$table).offset().left - main.labelWidth;  //减去标签长度
+            var node = new position(left, offsetTop, moment(temp).add(index * date, 'seconds'), "");
+            index++;
             main.axisXPosition.push(node);
         }
+        var tempLeft = $("tr:last td:last", main.$table).offset().left - main.labelWidth + main.width / 8;
 
-        var itemY = (main.height * 1.0 / 8);
-        for (var i = 0; i < 8; i++) {
-            var node = new position(main.offsetLeft - 20, main.offsetTop + (i * itemY) - i, main.maxValue - i * 10, 0, 12);
-            main.axisYPosition.push(node);
-        }
+        var node = new position(tempLeft, offsetTop, moment(temp).add(index * date, 'seconds'), "");
 
+        main.axisXPosition.push(node);
     }
+
+
+
     main.initLineData = function (array) {
 
         for (var c in array) {
 
             var node = new lineNode(array[c].TagName, array[c].Color, [], "", array[c].MinValue, array[c].MaxValue);
-            node.init(array[c].Data);
+
             main.nodes.push(node);
+            node.init(array[c].Data);
         }
 
         //var getArr = function (len) {

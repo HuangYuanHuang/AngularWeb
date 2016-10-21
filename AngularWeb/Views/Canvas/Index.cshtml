@@ -18,11 +18,11 @@
 </head>
 <body>
     <div class="container" ng-controller="canvasController">
-        <div class="table-responsive" style="margin-top:20px">
-            <table class="table table-bordered">
+        <div class="table-responsive" style="margin-top:40px">
+            <table id="tableCanvas" class="table table-bordered" >
 
-                <tr ng-repeat="item in Model.tableRow" on-finish-render-filters style="height:{{Model.tableRowHeight}}px">
-                    <td></td>
+                <tr ng-repeat="item in Model.tableRow" on-finish-render-filters style="height:{{Model.tableRowHeight}}px" >
+                    <td ></td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -37,8 +37,8 @@
                 <label ng-repeat="item in Model.axisXPosition" style="position:absolute;left:{{item.x}}px;top:{{item.y}}px">{{item.value|amDateFormat:'YYYY-MM-DD HH:mm:ss'}}</label>
 
             </div>
-            <div class="ytitle">
-                <label ng-repeat="item in Model.axisYPosition" style="position:absolute;left:{{item.x}}px;top:{{item.y}}px">{{item.value}}</label>
+            <div class="ytitle" ng-repeat="line in Model.nodes">
+                <label ng-repeat="item in line.axisYPosition" style="position:absolute;left:{{item.x}}px;top:{{item.y}}px;color:{{item.color}}" >{{item.value|number:3}}</label>
 
             </div>
 
@@ -73,7 +73,7 @@
                 $http.post('@Url.Action("List")').success(function (data) {
 
                     Canvas.initLineData(data);
-                    Canvas.draw();
+                   Canvas.draw();
 
                 })
             });
