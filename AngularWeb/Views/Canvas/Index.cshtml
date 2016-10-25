@@ -43,24 +43,35 @@
 
             </div>
 
-            <canvas id="canvas" ng-mousemove="Model.mouserOverEvent($event)" ng-dblclick="Model.mouseDbClick()" height="{{Model.height}}" width="{{Model.width}}" ng-style="Model.canvasStyle()"></canvas>
+            <canvas id="canvas" ng-mousedown="Model.mouseKeyDown($event)" ng-mouseup="Model.mouseKeyUp($event)" ng-mousemove="Model.mouserOverEvent($event)" ng-dblclick="Model.mouseDbClick()" height="{{Model.height}}" width="{{Model.width}}" ng-style="Model.canvasStyle()"></canvas>
+            <div class="canvas_div" ng-show="Model.scale.display"  ng-style="Model.scale.style()" ng-Right-Click="Model.scale.rightClick($event)">
 
+                
+            </div>
+            <div class="contextmenu" ng-show="Model.scale.contextMenu" ng-style="Model.scale.menuStyle()">
+                <div class="list-group">
+
+                    <a href="#" class="list-group-item"><span class="glyphicon glyphicon-plus-sign">&nbsp;放大</span></a>
+                    <a href="#" class="list-group-item"><span class="glyphicon glyphicon-minus-sign">&nbsp;还原</span></a>
+
+                </div>
+            </div>
             <div class="mousehr" ng-repeat="item in Model.splitLines">
                 <hr ng-Right-Click="item.mouseRightClick($event)" ng-mouseup="item.selectMouseUp($event)" ng-mousedown="item.selectClick($event)" ng-style="item.style()" />
                 <div class="contextmenu" ng-show="item.contextMenu" ng-style="item.menuStyle()">
                     <div class="list-group">
 
-                        <a href="#" class="list-group-item" ng-click="item.remove()">删除</a>
-                        <a href="#" class="list-group-item" ng-click="item.clear()">全部删除</a>
+                        <a href="#" class="list-group-item" ng-click="item.remove()"><span class="glyphicon glyphicon-remove">&nbsp;删除</span></a>
+                        <a href="#" class="list-group-item" ng-click="item.clear()"> <span class="glyphicon glyphicon-trash">&nbsp;清除</span></a>
 
                     </div>
                 </div>
-                <div class="popover fade right in" role="tooltip" ng-style="item.poverStyle()">
+                <div class="popover fade right in popover_hr" role="tooltip" ng-style="item.poverStyle()">
                     <div class="arrow" style="top: 50%;"></div>
                     <h3 class="popover-title">{{item.time|amDateFormat:'YYYY-MM-DD HH:mm:ss'}}</h3>
-                    <div class="popover-content">
+                    <div class="popover-content" style="max-height:200px;overflow-y:auto">
                         <ul>
-                            <li ng-repeat="d in item.poperNodes"> <span ng-style="d.style">{{d.value|number:3}}</span></li>
+                            <li ng-repeat="d in item.poperNodes"> <span ng-style="d.style">{{d.value}}</span></li>
                         </ul>
                     </div>
                 </div>
@@ -74,7 +85,7 @@
 
     <script src="~/app/GridCanvas.js"></script>
     <script type="text/javascript">
-        $('#element').tooltip('show')
+       
         var app = angular.module('app', ["canvasGrid"]);
         app.controller("canvasController", function ($scope, Canvas, $timeout, $http) {
             $scope.Model = Canvas;

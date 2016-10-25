@@ -85,7 +85,43 @@
             color: self.color
         }
     }
+    //放大缩小模型
+    var divScale = function () {
+        var self = this;
+        self.width = 0;
+        self.left = 0;
+        self.display = false;
+        self.contextMenu = false;
+        self.X = 0;
+        self.Y = 0;
+        self.menuStyle = function () {
+            return {
+                position: 'absolute',
+                "z-index": 2200,
+                top: self.Y + "px",
+                left: self.X + "px"
+            }
+        }
+        self.rightClick = function (e) {
+            self.contextMenu = true;
+            self.X = e.clientX;
+            self.Y = e.clientY;
+        }
+        self.style = function () {
+            return {
+                "z-index": 2000,
+                position: "absolute",
+                "background-color": "#808080",
+                top: main.offsetTop + "px",
+                left: self.left + "px",
+                height: main.height + "px",
+                width: self.width + "px",
+                opacity: 0.5,
+                filter: "alpha(opacity = 50)"
+            }
+        }
 
+    }
     //竖直分割线模型
     var splitNode = function (id, x, y) {
         var self = this;
@@ -148,8 +184,13 @@
             }
         }
         self.poverStyle = function () {
+            var h = $(".popover_hr").height();
+            var top = self.poverY;
+            if ((top + h) > main.height + main.offsetTop) {
+                top = main.height + main.offsetTop - h;
+            }
             return {
-                top: self.poverY + "px",
+                top: top + "px",
                 left: self.X + "px",
                 display: "block"
             }
@@ -175,7 +216,7 @@
                     node = new poperNode("NaN", main.nodes[c].color);
                     self.poperNodes.push(node);
                 }
-              
+
 
                 if (arr.length > 1 && date.isAfter(arr[0].time) && date.isBefore(arr[arr.length - 1].time)) {
                     for (var i = 0; i < arr.length - 1; i++) {
@@ -195,15 +236,15 @@
                         }
 
                         if (isFind) {
-                           
-                            node.value = findValue;
+
+                            node.value = findValue.toFixed(3);
                         }
                     }
                 }
                 if (date.isSame(arr[0].time)) {
-                    node.value = arr[0].value;
+                    node.value = arr[0].value.toFixed(3);
                 } else if (date.isSame(arr[arr.length - 1].time)) {
-                    node.value = arr[arr.length - 1].value;
+                    node.value = arr[arr.length - 1].value.toFixed(3);
                 }
 
             }
@@ -242,11 +283,11 @@
         return {
             "z-index": 10,
             position: 'absolute',
-
             top: main.offsetTop + "px",
 
         }
     };
+    main.scale = new divScale();
     main.canvasContext = null;
     main.splitLines = [];
     main.splitIndex = 0;
@@ -295,7 +336,7 @@
                 main.tableRow.push(i);
             }
         }
-        if (len <= 3) {
+        if (len <= 5) {
             getArr(8);
 
         } else if (len <= 10) {
@@ -347,7 +388,28 @@
             main.currSelectSplit.compTimeValue(e.clientX);
 
         }
+        if (main.isScale) {
+            main.scale.display = true;
+            main.scale.X = e.clientX;
+            main.scale.width = e.clientX - main.scale.left;
+        }
 
+    }
+    main.mouseKeyUp = function (e) {
+        main.isScale = false;
+        console.log("scale=end X=" + main.scale.X);
+    }
+    main.isScale = false;
+    main.mouseKeyDown = function (e) {
+        main.splitLines.forEach(function (item) {
+
+            item.contextMenu = false;
+        });
+        main.isScale = true;
+        main.scale.display = false;
+        main.scale.contextMenu = false;
+        main.scale.left = e.clientX;
+        console.log("scale=start X=" + e.clientX);
     }
     //鼠标双击 竖直分割线
     main.mouseDbClick = function () {
