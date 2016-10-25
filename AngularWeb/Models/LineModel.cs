@@ -24,6 +24,10 @@ namespace AngularWeb.Models
                 Data.Sort(new LineDataNode());
                 MinValue = Data.Min(d => d.Value);
                 MaxValue = Data.Max(d => d.Value);
+
+                var temp =( MaxValue - MinValue) / 10;
+                MinValue -= temp;
+                MaxValue += temp;
             }
         }
 

@@ -42,13 +42,12 @@
             var itemIndex = 0;
             var tempX = $("tr", main.$table).offset().left - 80;
             for (var i = rows - 1; i >= 0; i--) {
-                var tempY = $("tr:eq(" + i + ")", main.$table).offset().top + itemHeight - index * main.labelHeight;
-                console.log("Y=" + tempY);
+                var tempY = main.offsetTop + (i + 1) * itemHeight - index * main.labelHeight;
+
                 self.axisYPosition.push(new position(tempX, tempY, itemIndex * itemY + self.minValue, self.color));
                 itemIndex++;
             }
-            //var lastY = self.axisYPosition[rows-1].y - self.axisYPosition[0].y + self.axisYPosition[1].y;
-            //self.axisYPosition.push(new position(tempX,lastY,self.maxValue,self.color));
+
         }
         self.clearData = function () {
 
@@ -74,10 +73,17 @@
         }
     }
     var position = function (x, y, value, color) {
-        this.x = x;
-        this.y = y;
-        this.value = value;
-        this.color = color;
+        var self = this;
+        self.x = x;
+        self.y = y;
+        self.value = value;
+        self.color = color;
+        self.style = {
+            position: 'absolute',
+            left: self.x + "px",
+            top: self.y + "px",
+            color: self.color
+        }
     }
 
     //竖直分割线模型
@@ -86,6 +92,7 @@
         self.id = id;
         this.X = x;
         this.Y = y;
+        this.poverY = y;
         self.contextMenu = false;
         self.selectClick = function (e) {
 
@@ -123,7 +130,93 @@
 
             main.currSelectSplit = null;
         }
+        self.style = function () {
+            return {
+                height: main.height + "px",
+                "z-index": 12,
+                position: "absolute",
+                top: main.offsetTop + "px",
+                left: self.X + "px"
+            }
+        }
+        self.menuStyle = function () {
+            return {
+                position: 'absolute',
+                "z-index": 1200,
+                top: self.Y + "px",
+                left: self.X + "px"
+            }
+        }
+        self.poverStyle = function () {
+            return {
+                top: self.poverY + "px",
+                left: self.X + "px",
+                display: "block"
+            }
+        }
+        self.time = "";
+        self.compTimeValue = function (value) {
 
+            var seconds = ((value - main.offsetLeft + 1) / main.width) * main.offsetTime;
+            self.time = moment(main.startDate).add(seconds, 'seconds');
+            console.log(self.time.format());
+            self.compValue(self.time);
+        }
+        self.compValue = function (time) {
+
+            for (var c in main.nodes) {
+                var arr = main.nodes[c].data;
+                var date = moment(time);
+                var node = null;
+                if (self.poperNodes.length > c) {
+                    node = self.poperNodes[c];
+                    node.value = "NaN";
+                } else {
+                    node = new poperNode("NaN", main.nodes[c].color);
+                    self.poperNodes.push(node);
+                }
+              
+
+                if (arr.length > 1 && date.isAfter(arr[0].time) && date.isBefore(arr[arr.length - 1].time)) {
+                    for (var i = 0; i < arr.length - 1; i++) {
+                        var isFind = false;
+                        var findValue = 0;
+                        if (date.isAfter(arr[i].time) && date.isBefore(arr[i + 1].time)) {
+                            var tempX = moment(arr[i + 1].time).diff(arr[i].time, "seconds", true);
+                            var tempTime = moment(time).diff(arr[i].time, "seconds", true);
+
+                            findValue = arr[i].value + (arr[i + 1].value - arr[i].value) * (tempTime / tempX);
+
+                            isFind = true;
+
+                        } else if (date.isSame(arr[i].time)) {
+                            findValue = arr[i].value;
+                            isFind = true;
+                        }
+
+                        if (isFind) {
+                           
+                            node.value = findValue;
+                        }
+                    }
+                }
+                if (date.isSame(arr[0].time)) {
+                    node.value = arr[0].value;
+                } else if (date.isSame(arr[arr.length - 1].time)) {
+                    node.value = arr[arr.length - 1].value;
+                }
+
+            }
+        }
+        self.poperNodes = [];
+        var poperNode = function (value, color) {
+            this.value = value;
+            this.color = color;
+            var node = this;
+            this.style = {
+                "color": node.color
+            }
+        }
     }
     main.width = 1000;
     main.height = 400;
@@ -137,13 +230,23 @@
     main.offsetLeft = 0;
     main.axisXPosition = [];
     main.axisYPosition = [];
-    main.tableRow = [1, 2, 3, 4, 5, 6, 7, 8];  //Table Row
-    main.tableRowHeight = 60; //Table　row height
+    main.tableRow = [1, 2, 3, 4, 5, 6, 7, 8];  //Table MaxRow
+
 
     main.offsetTime = 3600;  //起始结束相隔时间 秒
     main.offsetValue = 80;  //Y坐标值
     main.labelWidth = 72; //标签实际长度的1/2
     main.labelHeight = 10; //标签实际高度的1/2
+
+    main.canvasStyle = function () {
+        return {
+            "z-index": 10,
+            position: 'absolute',
+
+            top: main.offsetTop + "px",
+
+        }
+    };
     main.canvasContext = null;
     main.splitLines = [];
     main.splitIndex = 0;
@@ -151,7 +254,8 @@
         main.startDate = moment("2016-10-19 08:00:00");
         main.endDate = moment("2016-10-19 08:00:00").add(1, 'hours');
         main.width = main.$table.width();
-        main.height = main.$table.height();
+        main.height = $(document).height() * 0.7;// main.$table.height();
+        main.$table.height(main.height);
         main.offsetTop = main.$table.offset().top;
         main.offsetLeft = main.$table.offset().left;
 
@@ -162,10 +266,10 @@
 
     }
     main.loadAxis = function () {
-
-        var date = main.endDate.diff(main.startDate, 'seconds', true) / 4;
+        main.offsetTime = main.endDate.diff(main.startDate, 'seconds', true);
+        var date = main.offsetTime / 4;
         var temp = main.startDate.format();
-        var offsetTop = $("tr:last", main.$table).offset().top + $("tr:last", main.$table).height() + 20;
+        var offsetTop = main.offsetTop + main.height + 20;
         console.log(date + "时间间隔");
         var index = 0;
         for (var i = 0; i < 8; i += 2) {
@@ -179,8 +283,29 @@
         var node = new position(tempLeft, offsetTop, moment(temp).add(index * date, 'seconds'), "");
 
         main.axisXPosition.push(node);
-    }
 
+
+    }
+    main.axixYAxix = function (len) {
+        while (main.tableRow.length > 0) {
+            main.tableRow.pop();
+        }
+        var getArr = function (len) {
+            for (var i = 0; i < len; i++) {
+                main.tableRow.push(i);
+            }
+        }
+        if (len <= 3) {
+            getArr(8);
+
+        } else if (len <= 10) {
+            getArr(4);
+
+        } else {
+            getArr(2);
+
+        }
+    }
 
 
     main.initLineData = function (array) {
@@ -193,23 +318,6 @@
             node.init(array[c].Data);
         }
 
-        //var getArr = function (len) {
-
-        //    for (var i = 0; i < len; i++) {
-        //        main.tableRow.push(i);
-        //    }
-
-        //}
-        //if (main.nodes.length <= 3) {
-        //    getArr(8);
-        //    main.tableRowHeight = 60;
-        //} else if (main.nodes.length < 8) {
-        //    getArr(5);
-        //    main.tableRowHeight = 80;
-        //} else {
-        //    getArr(3);
-        //    main.tableRowHeight = 130;
-        //}
 
     }
     main.draw = function () {
@@ -225,6 +333,7 @@
 
             });
 
+
         }
     }
     main.currMousePageX = 0;
@@ -235,13 +344,16 @@
         main.currMousePageY = e.clientY;
         if (main.currSelectSplit != null) {
             main.currSelectSplit.X = e.clientX;
+            main.currSelectSplit.compTimeValue(e.clientX);
 
         }
 
     }
     //鼠标双击 竖直分割线
     main.mouseDbClick = function () {
-        main.splitLines.push(new splitNode(main.splitIndex, main.currMousePageX, main.currMousePageY));
+        var node = new splitNode(main.splitIndex, main.currMousePageX, main.currMousePageY);
+        node.compTimeValue(main.currMousePageX);
+        main.splitLines.push(node);
         main.splitIndex++;
     }
 

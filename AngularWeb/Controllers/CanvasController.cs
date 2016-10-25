@@ -15,7 +15,7 @@ namespace AngularWeb.Controllers
         }
 
         [HttpPost]
-        //[OutputCache(Duration = 6000)]
+        [OutputCache(Duration = 60)]
         public JsonResult List()
         {
 

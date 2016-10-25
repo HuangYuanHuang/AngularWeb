@@ -11,6 +11,7 @@
     <script src="~/Scripts/JSLINQ.js"></script>
     <script src="~/Scripts/bootstrap.js"></script>
     <script src="~/Scripts/angular.js"></script>
+    <script src="~/Scripts/angular-animate.js"></script>
     <script src="~/Scripts/moment.min.js"></script>
     <script src="~/Scripts/moment-with-locales.js"></script>
     <script src="~/Scripts/angular-moment.min.js"></script>
@@ -19,10 +20,10 @@
 <body>
     <div class="container" ng-controller="canvasController">
         <div class="table-responsive" style="margin-top:40px">
-            <table id="tableCanvas" class="table table-bordered" >
+            <table id="tableCanvas" class="table table-bordered">
 
-                <tr ng-repeat="item in Model.tableRow" on-finish-render-filters style="height:{{Model.tableRowHeight}}px" >
-                    <td ></td>
+                <tr ng-repeat="item in Model.tableRow" on-finish-render-filters>
+                    <td></td>
                     <td></td>
                     <td></td>
                     <td></td>
@@ -34,24 +35,33 @@
 
             </table>
             <div class="xtitle">
-                <label ng-repeat="item in Model.axisXPosition" style="position:absolute;left:{{item.x}}px;top:{{item.y}}px">{{item.value|amDateFormat:'YYYY-MM-DD HH:mm:ss'}}</label>
+                <label ng-repeat="item in Model.axisXPosition" ng-style="item.style">{{item.value|amDateFormat:'YYYY-MM-DD HH:mm:ss'}}</label>
 
             </div>
             <div class="ytitle" ng-repeat="line in Model.nodes">
-                <label ng-repeat="item in line.axisYPosition" style="position:absolute;left:{{item.x}}px;top:{{item.y}}px;color:{{item.color}}" >{{item.value|number:3}}</label>
+                <label ng-repeat="item in line.axisYPosition" ng-style="item.style">{{item.value|number:3}}</label>
 
             </div>
 
-            <canvas id="canvas" ng-mousemove="Model.mouserOverEvent($event)" ng-dblclick="Model.mouseDbClick()" height="{{Model.height}}" width="{{Model.width}}" style="z-index:10;position:absolute;top:{{Model.offsetTop}}px"></canvas>
+            <canvas id="canvas" ng-mousemove="Model.mouserOverEvent($event)" ng-dblclick="Model.mouseDbClick()" height="{{Model.height}}" width="{{Model.width}}" ng-style="Model.canvasStyle()"></canvas>
 
             <div class="mousehr" ng-repeat="item in Model.splitLines">
-                <hr ng-Right-Click="item.mouseRightClick($event)" ng-mouseup="item.selectMouseUp($event)" ng-mousedown="item.selectClick($event)" style="height:{{Model.height}}px;z-index:12;position:absolute;top:{{Model.offsetTop}}px;left:{{item.X}}px" />
-                <div class="contextmenu" ng-show="item.contextMenu" style="position:absolute;z-index:20;top:{{item.Y}}px;left:{{item.X}}px">
+                <hr ng-Right-Click="item.mouseRightClick($event)" ng-mouseup="item.selectMouseUp($event)" ng-mousedown="item.selectClick($event)" ng-style="item.style()" />
+                <div class="contextmenu" ng-show="item.contextMenu" ng-style="item.menuStyle()">
                     <div class="list-group">
 
                         <a href="#" class="list-group-item" ng-click="item.remove()">删除</a>
                         <a href="#" class="list-group-item" ng-click="item.clear()">全部删除</a>
 
+                    </div>
+                </div>
+                <div class="popover fade right in" role="tooltip" ng-style="item.poverStyle()">
+                    <div class="arrow" style="top: 50%;"></div>
+                    <h3 class="popover-title">{{item.time|amDateFormat:'YYYY-MM-DD HH:mm:ss'}}</h3>
+                    <div class="popover-content">
+                        <ul>
+                            <li ng-repeat="d in item.poperNodes"> <span ng-style="d.style">{{d.value|number:3}}</span></li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -64,6 +74,7 @@
 
     <script src="~/app/GridCanvas.js"></script>
     <script type="text/javascript">
+        $('#element').tooltip('show')
         var app = angular.module('app', ["canvasGrid"]);
         app.controller("canvasController", function ($scope, Canvas, $timeout, $http) {
             $scope.Model = Canvas;
@@ -71,10 +82,9 @@
             $scope.$on('ngRepeatFinished', function (ngRepeatFinishedEvent) {
                 Canvas.init();
                 $http.post('@Url.Action("List")').success(function (data) {
-
+                    Canvas.axixYAxix(data.length);
                     Canvas.initLineData(data);
-                   Canvas.draw();
-
+                    Canvas.draw();
                 })
             });
         });
